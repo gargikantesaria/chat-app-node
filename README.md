@@ -5,4 +5,7 @@ Firstly, i used local storage to store roomId. If you want it globally, you can 
 
 Test:
 
-You can check with normal browser mode and icongnito mode, for multiple room chat with multiple users and delete room functionality.
+Two simple steps, you need to follow to chat with multiple user is same/multiple room.
+
+1. Create room: http://localhost:8080/createRoom
+2. Share the created room id with one, whom you want to chat
