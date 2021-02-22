@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Simple Group Chat on Node.js</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font: 13px Helvetica, Arial;
+        }
+
+        form {
+            background: #fff;
+            padding: 3px;
+            position: fixed;
+            bottom: 0;
+            width: 500px;
+            border-color: #000;
+            border-top-style: solid;
+            border-top-width: 1px;
+        }
+
+        form input {
+            border-style: solid;
+            border-width: 1px;
+            padding: 10px;
+            width: 64%;
+            margin-right: .5%;
+        }
+
+        form button {
+            width: 5%;
+            background: rgb(130, 224, 255);
+            border: none;
+            padding: 10px;
+            margin-right: -0.5%;
+            width: 60px;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages li {
+            padding: 5px 10px;
+        }
+
+        #messages li:nth-child(odd) {
+            background: #eee;
+        }
+
+        .button-right {
+            width: 22%;
+            float: right;
+            background-color: rgb(255 124 124);
+            border: none;
+            color: #000;
+            padding: 10px;
+        }
+        .chatBox{
+            max-width: 500px;
+            margin: auto;
+            height: 100vh;
+            box-shadow: 0 0 5px #dfdfdf;
+        }
+        .header{
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+    <script src="../../socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+</head>
+
+<body>
+    <div class="chatBox">
+        <div class="header">
+            <h1>Chat App</h1>
+        </div>
+        <ul id="messages"></ul>
+        <form action="/" method="POST" id="chatForm">
+            <input id="txt" autocomplete="off" autofocus="on"
+                placeholder="type your message here..." />
+            <button>Send</button>
+            <button type="button" class="button-right" onclick=deleteRoom()>Delete Room</button>
+        </form>
+    </div>
+    <script>
+        var socket = io.connect('http://localhost:8080');
+        //check if room id exist 
+        if (!localStorage.getItem('roomId')) {
+            // create room when connect
+            socket.emit('create', 'room1');
+        } else {
+            //if room not exist
+            socket.emit('join_room', { roomId: localStorage.getItem('roomId'), name: 'room1' })
+        }
+
+        // submit text message without reload/refresh the page
+        $('form').submit((e) => {
+            e.preventDefault(); // prevents page reloading
+            socket.emit('chat_message', $('#txt').val());
+            $('#txt').val('');
+            return false;
+        });
+        // check which room has joined
+        socket.on('joined_room', (data) => {
+            localStorage.setItem('roomId', data.room_id);
+            $('#messages').append($('<li>').html('🔵 <i> ' + data.user_name + ' joined the chat in room "' + data.room + '"</i>'));
+        })
+        // append the chat text message
+        socket.on('chat_message', (msg) => {
+            $('#messages').append($('<li>').html(msg));
+        });
+        // append text if someone is online
+        socket.on('is_online', (username) => {
+            $('#messages').append($('<li>').html(username));
+        });
+
+        // ask username
+        const username = prompt('Please tell me your name');
+        socket.emit('username', username);
+
+        // on disconnect when delete the room
+        socket.on('disconnect', () => {
+            localStorage.removeItem('roomId');
+            $('#messages').append($('<li>').html('🔴 <i> Room distroyed ...!!!</i>'))
+        })
+
+        //delete room
+        function deleteRoom() {
+            const roomId = localStorage.getItem('roomId')
+            socket.emit('delete_room', roomId)
+        }
+    </script>
+</body>
+
+</html>
