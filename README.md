@@ -5,4 +5,4 @@ Firstly, i used local storage to store roomId. If you want it globally, you can 
 
 Test:
 
-You can check with normal browser mode and icongnito mode, for two different room chat with users and delete functionality.
+You can check with normal browser mode and icongnito mode, for multiple room chat with multiple users and delete room functionality.
