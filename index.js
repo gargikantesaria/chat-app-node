@@ -3,7 +3,10 @@ const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
-app.get('/', (req, res) => {
+app.get('/createRoom', (req, res) => {
+    res.render('createRoom.ejs');
+});
+app.get('/room:id', (req, res) => {
     res.render('index.ejs');
 });
 
@@ -13,7 +16,7 @@ io.sockets.on('connection', (socket) => {
         socket.rooms = [{ id: socket.id, name: room }];
         socket.roomId = socket.rooms[0].id;
         //let user join the room after creation
-        socket.join(socket.rooms[0].id);
+        socket.emit('socket_created', socket.roomId);
     });
 
     //room already exist and user joined this room

@@ -93,25 +93,25 @@
         </form>
     </div>
     <script>
+        var roomId;
+        //get room id
+        function getRoomId(){
+            var url_string = window.location.href; //window.location.href
+            var url = new URL(url_string);
+            roomId = url.pathname.split(':')[1];
+            console.log('room', roomId);
+        }
         var socket = io.connect('http://localhost:8080');
         //check if room id exist 
-        if (!localStorage.getItem('roomId')) {
-            // create room when connect
-            socket.emit('create', 'room1');
-        } else {
-            //if room not exist
-            socket.emit('join_room', { roomId: localStorage.getItem('roomId'), name: 'room1' })
+        getRoomId();
+        if(roomId) {
+            socket.emit('join_room', { roomId: roomId, name: 'room1' })
         }
-
         // submit text message without reload/refresh the page
         $('form').submit((e) => {
             e.preventDefault(); // prevents page reloading
             // roomId exist
-            if(localStorage.getItem('roomId')){
-                socket.emit('chat_message', $('#txt').val());
-            } else {
-                $('#messages').append($('<li>').html(`🔴 <i> Room Distroyed ...!!!</i>`))
-            }
+            (roomId) ? socket.emit('chat_message', $('#txt').val()) : $('#messages').append($('<li>').html(`🔴 <i> Room Distroyed ...!!!</i>`));
             $('#txt').val('');
             return false;
         });
@@ -132,7 +132,6 @@
         // ask username
         const username = prompt('Please tell me your name');
         socket.emit('username', username);
-
         // on disconnect when delete the room
         socket.on('disconnectRoom', () => {
             localStorage.removeItem('roomId');
