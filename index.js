@@ -31,7 +31,7 @@ io.sockets.on('connection', (socket) => {
         io.to(socket.roomId).emit('is_online', '🔵 <i>' + socket.username + ' join the chat..</i>');
     });
 
-    //on disconnect with socket
+    //on disconnect user
     socket.on('disconnect', (username) => {
         io.to(socket.roomId).emit('is_online', '🔴 <i>' + (socket.username || username) + ' left the chat..</i>');
     })
@@ -40,7 +40,7 @@ io.sockets.on('connection', (socket) => {
     socket.on('chat_message', (message) => {
         socket.roomId ? 
         io.to(socket.roomId).emit('chat_message', '<strong>' + socket.username + '</strong>: ' + message) :
-        io.emit('disconnect');
+        io.emit('disconnectRoom');
     });
 
     //delete room
@@ -50,7 +50,7 @@ io.sockets.on('connection', (socket) => {
         // only if room exist
         if(roomExist.length > 0){
             socket.rooms = [];
-            io.emit('disconnect');
+            io.to(roomId).emit('disconnectRoom');
             socket.disconnect(true);
             delete socket.roomId;
         }

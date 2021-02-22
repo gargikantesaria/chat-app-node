@@ -106,7 +106,12 @@
         // submit text message without reload/refresh the page
         $('form').submit((e) => {
             e.preventDefault(); // prevents page reloading
-            socket.emit('chat_message', $('#txt').val());
+            // roomId exist
+            if(localStorage.getItem('roomId')){
+                socket.emit('chat_message', $('#txt').val());
+            } else {
+                $('#messages').append($('<li>').html(`🔴 <i> Room Distroyed ...!!!</i>`))
+            }
             $('#txt').val('');
             return false;
         });
@@ -129,9 +134,9 @@
         socket.emit('username', username);
 
         // on disconnect when delete the room
-        socket.on('disconnect', () => {
+        socket.on('disconnectRoom', () => {
             localStorage.removeItem('roomId');
-            $('#messages').append($('<li>').html('🔴 <i> Room distroyed ...!!!</i>'))
+            $('#messages').append($('<li>').html(`🔴 <i> Room Distroyed ...!!!</i>`))
         })
 
         //delete room
