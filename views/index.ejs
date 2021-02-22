@@ -111,7 +111,7 @@
         $('form').submit((e) => {
             e.preventDefault(); // prevents page reloading
             // roomId exist
-            (roomId) ? socket.emit('chat_message', $('#txt').val()) : $('#messages').append($('<li>').html(`🔴 <i> Room Distroyed ...!!!</i>`));
+            (localStorage.getItem('roomId')) ? socket.emit('chat_message', $('#txt').val()) : $('#messages').append($('<li>').html(`🔴 <i> Room Distroyed ...!!!</i>`));
             $('#txt').val('');
             return false;
         });
