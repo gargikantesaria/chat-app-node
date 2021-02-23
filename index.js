@@ -1,5 +1,9 @@
 const express = require('express');
+var bodyParser = require("body-parser");
 const app = express();
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const ioClient = require('socket.io-client')('http://localhost:8080');
@@ -11,8 +15,11 @@ app.get('/createRoomUI', (req, res) => {
 app.get('/room:id', (req, res) => {
     res.render('index.ejs');
 });
-
+var roomId;
 io.sockets.on('connection', (socket) => {
+    roomId = socket.id;
+    socket.rooms = [{ id: socket.id, name: 'room1' }];
+
     //on create new room, when not exist
     socket.on('create', (room) => {
         socket.rooms = [{ id: socket.id, name: room }];
@@ -59,17 +66,21 @@ io.sockets.on('connection', (socket) => {
             socket.disconnect(true);
             delete socket.roomId;
         }
-       
     })
 
 });
 //API to create room
 app.get('/createRoom', (req, res) => {
     ioClient.emit('create');
-    ioClient.on('socket_created', (roomId) => {
-        res.status(200).send({body: {msg : 'New Room Generated', roomId: roomId}});  
-    })
+    res.status(200).send({body: {msg : 'New Room Generated', roomId: roomId}});  
 })
+
+//API to create room
+app.post('/deleteRoom', (req, res) => {
+    ioClient.emit('delete_room', req.body.roomId);
+    res.status(200).send({body: {msg : 'Room Deleted'}});  
+})
+
 
 const server = http.listen(8080, () => {
     console.log('listening on *:8080');
