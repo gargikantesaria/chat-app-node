@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const ioClient = require('socket.io-client')('http://192.168.0.108:8080');
+const ioClient = require('socket.io-client')('http://localhost:8080');
 
 app.get('/createRoomUI', (req, res) => {
     res.render('createRoom.ejs');
@@ -66,8 +66,8 @@ io.sockets.on('connection', (socket) => {
 //API to create room
 app.get('/createRoom', (req, res) => {
     ioClient.emit('create');
-    socket.on('socket_created', (roomId) => {
-        res.send({body: {msg : 'New Room Generated', roomId: roomId}});  
+    ioClient.on('socket_created', (roomId) => {
+        res.status(200).send({body: {msg : 'New Room Generated', roomId: roomId}});  
     })
 })
 
